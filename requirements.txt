@@ -1,0 +1,10 @@
+fastapi
+elasticsearch
+langchain
+PyPDF2
+pydantic
+transformers
+torch
+PyMuPDF
+opencv-python
+numpy

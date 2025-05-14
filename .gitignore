@@ -1,0 +1,10 @@
+data
+table_visualizations
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+
+.github
+.vscode
