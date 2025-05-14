@@ -34,7 +34,7 @@ class TableTransformerAdaptor:
         self.structure_model.to(self.device)
 
         self.detection_threshold = 0.9
-        self.structure_threshold = 0.5
+        self.structure_threshold = 0.6
 
     def extract_page_image(self, pdf_path: str, page_number: int) -> np.ndarray:
         doc = fitz.open(pdf_path)
@@ -85,7 +85,9 @@ class TableTransformerAdaptor:
         table_image = image[y_min:y_max, x_min:x_max]
 
         encoding = self.structure_feature_extractor(
-            images=table_image, return_tensors="pt"
+            images=table_image,
+            size={"height": table_image.shape[0], "width": table_image.shape[1]},
+            return_tensors="pt"
         )
 
         for k, v in encoding.items():
@@ -477,7 +479,9 @@ class TableTransformerAdaptor:
         table_pil = Image.fromarray(table_image)
 
         encoding = self.structure_feature_extractor(
-            images=table_image, return_tensors="pt"
+            images=table_image, 
+            size={"height": table_image.shape[0], "width": table_image.shape[1]},
+            return_tensors="pt"
         )
 
         for k, v in encoding.items():
