@@ -1,8 +1,5 @@
 import os
-import sys
 import argparse
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from table_rag.adaptors.table_transformer_adaptor import TableTransformerAdaptor
 from table_rag import DEFAULT_PATH
