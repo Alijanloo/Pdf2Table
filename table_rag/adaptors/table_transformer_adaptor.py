@@ -6,7 +6,7 @@ import fitz
 import os
 from transformers import DetrFeatureExtractor, TableTransformerForObjectDetection
 from table_rag.entities.models import TableCell
-
+# import matplotlib.pyplot as plt
 
 class TableTransformerAdaptor:
     def __init__(
@@ -28,6 +28,7 @@ class TableTransformerAdaptor:
         self.structure_feature_extractor = DetrFeatureExtractor.from_pretrained(
             structure_model
         )
+        self.structure_feature_extractor.size["shortest_edge"] = 800
 
         self.device = device
         self.detection_model.to(self.device)
@@ -86,7 +87,6 @@ class TableTransformerAdaptor:
 
         encoding = self.structure_feature_extractor(
             images=table_image,
-            size={"height": table_image.shape[0], "width": table_image.shape[1]},
             return_tensors="pt"
         )
 
@@ -268,6 +268,12 @@ class TableTransformerAdaptor:
                             gray = cv2.cvtColor(cell_img, cv2.COLOR_RGB2GRAY)
                         else:
                             gray = cell_img
+
+                        # plt.figure(figsize=(8, 6))
+                        # plt.imshow(cell_img)
+                        # plt.axis('off')
+                        # plt.show()
+                        # plt.close()
 
                         gray = cv2.equalizeHist(gray)
 
@@ -479,8 +485,7 @@ class TableTransformerAdaptor:
         table_pil = Image.fromarray(table_image)
 
         encoding = self.structure_feature_extractor(
-            images=table_image, 
-            size={"height": table_image.shape[0], "width": table_image.shape[1]},
+            images=table_image,
             return_tensors="pt"
         )
 
