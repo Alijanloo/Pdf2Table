@@ -274,8 +274,8 @@ class TableTransformerAdaptor:
 
                 median_diff = sorted(differences)[len(differences)//2]
 
+                # Adjusting threshold for too high or low median_diffs
                 threshold = max(threshold, median_diff * 0.7)
-
                 if median_diff < 5:
                     threshold = min(threshold, median_diff * 2)
 
