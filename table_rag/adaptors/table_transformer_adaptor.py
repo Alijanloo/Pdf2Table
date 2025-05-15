@@ -1,10 +1,13 @@
 from typing import List, Dict, Any, Tuple
+
 import cv2
 import numpy as np
 import torch
 import fitz
 import os
 from transformers import DetrFeatureExtractor, TableTransformerForObjectDetection
+
+from table_rag.utils.table_visualization import visualize_cell_grid
 
 class TableTransformerAdaptor:
     def __init__(
@@ -144,8 +147,9 @@ class TableTransformerAdaptor:
             "box": table_box,
         }
 
-        self.visualize_cell_grid(cell_grid, table_image)
-        
+        # uncomment this to visualize the cell grid
+        # visualize_cell_grid(cell_grid, table_image)
+
         return result
 
     def _group_into_rows_and_columns(
