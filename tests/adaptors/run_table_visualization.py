@@ -57,7 +57,7 @@ def main():
         )
         print(f"Detection visualization saved to {detection_output}")
     else:
-        results = adaptor.visualize_table_detection(pdf_path, args.page)
+        results = adaptor.extract_tables(pdf_path, args.page)
 
     tables = adaptor.detect_tables(adaptor.extract_page_image(pdf_path, args.page))
     if not tables:

@@ -6,8 +6,10 @@ import torch
 import fitz
 import os
 from transformers import DetrFeatureExtractor, TableTransformerForObjectDetection
+from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+from PIL import Image
 
-from table_rag.utils.table_visualization import visualize_cell_grid
+from table_rag.utils.table_visualization import visualize_cell_grid, visualize_table_structure
 
 class TableTransformerAdaptor:
     def __init__(
@@ -37,6 +39,10 @@ class TableTransformerAdaptor:
 
         self.detection_threshold = 0.9
         self.structure_threshold = 0.6
+
+        self.ocr_processor = TrOCRProcessor.from_pretrained('microsoft/trocr-base-printed')
+        self.ocr_model = VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-base-printed')
+        self.ocr_model.to(self.device)
 
     def extract_page_image(self, pdf_path: str, page_number: int) -> np.ndarray:
         doc = fitz.open(pdf_path)
@@ -103,6 +109,9 @@ class TableTransformerAdaptor:
             target_sizes=[(table_image.shape[0], table_image.shape[1])],
         )[0]
 
+        # uncomment this to visualize the table structure
+        # visualize_table_structure(Image.fromarray(table_image), results, self.structure_model.config.id2label)
+
         cells = []
         for score, label, box in zip(
             results["scores"], results["labels"], results["boxes"]
@@ -138,7 +147,7 @@ class TableTransformerAdaptor:
                 )
 
         rows, cols = self._group_into_rows_and_columns(cells)
-        cell_grid = self._assign_row_col_indices(cells, rows, cols)
+        cell_grid = self._assign_row_col_indices(cells, rows, cols, table_image)
 
         result = {
             "cells": cell_grid,
@@ -301,7 +310,7 @@ class TableTransformerAdaptor:
         return cluster_centers
 
     def _assign_row_col_indices(
-        self, cells: List[Dict[str, Any]], rows: List[int], cols: List[int]
+        self, cells: List[Dict[str, Any]], rows: List[int], cols: List[int], table_image: np.ndarray
     ) -> List[Dict[str, Any]]:
         if not rows or not cols:
             return []
@@ -383,6 +392,24 @@ class TableTransformerAdaptor:
                     }
                 cell_grid.append(cell_with_indices)
         cell_grid.sort(key=lambda cell: (cell["row"], cell["col"]))
+
+        for cell in cell_grid:
+            x_min, y_min, x_max, y_max = cell["box"]
+            x_min = max(0, x_min)
+            y_min = max(0, y_min)
+            x_max = min(table_image.shape[1], x_max)
+            y_max = min(table_image.shape[0], y_max)
+            crop = table_image[y_min:y_max, x_min:x_max]
+            if crop.size > 0 and crop.shape[0] > 0 and crop.shape[1] > 0:
+                pil_img = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
+                pixel_values = self.ocr_processor(images=pil_img, return_tensors="pt").pixel_values.to(self.device)
+                with torch.no_grad():
+                    generated_ids = self.ocr_model.generate(pixel_values)
+                generated_text = self.ocr_processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+                cell["text"] = generated_text.strip()
+            else:
+                cell["text"] = ""
+
         return cell_grid
 
     def extract_tables(self, pdf_path: str, page_number: int) -> List[Dict[str, Any]]:
