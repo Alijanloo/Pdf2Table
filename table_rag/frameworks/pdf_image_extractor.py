@@ -1,10 +1,9 @@
 import cv2
 import numpy as np
 import fitz
-from typing import Optional
 
 from table_rag.entities.table_entities import PageImage
-from table_rag.adaptors.table_extraction_adaptor import PDFImageExtractorInterface
+from table_rag.usecases.interfaces.framework_interfaces import PDFImageExtractorInterface
 
 
 class PyMuPDFImageExtractor(PDFImageExtractorInterface):

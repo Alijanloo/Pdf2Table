@@ -4,7 +4,7 @@ from typing import List
 from transformers import DetrFeatureExtractor, TableTransformerForObjectDetection
 
 from table_rag.entities.table_entities import PageImage, DetectedCell, BoundingBox
-from table_rag.adaptors.table_extraction_adaptor import TableStructureRecognizerInterface
+from table_rag.usecases.interfaces.framework_interfaces import TableStructureRecognizerInterface
 
 
 class TableTransformerStructureRecognizer(TableStructureRecognizerInterface):
