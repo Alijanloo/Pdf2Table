@@ -3,7 +3,6 @@ from typing import List
 from table_rag.entities.table_entities import DetectedCell, TableGrid
 
 
-# Domain Services (Business Rules)
 class TableValidationService:
     """Domain service for table validation rules."""
 
@@ -41,18 +40,36 @@ class CoordinateClusteringService:
         if not coords:
             return []
 
-        sorted_coords = sorted(set(coords))
-        if len(sorted_coords) == 1:
-            return sorted_coords
+        coords = sorted(set(coords))
 
-        # Simple clustering based on threshold
-        clusters = [[sorted_coords[0]]]
+        if len(coords) > 2:
+            differences = [coords[i+1] - coords[i] for i in range(len(coords)-1)]
+            if differences:
 
-        for coord in sorted_coords[1:]:
+                mean_diff = sum(differences) / len(differences)
+
+                # Adjusting threshold for too high or low mean_diffs
+                threshold = max(threshold, mean_diff * 0.7)
+                if mean_diff < 5:
+                    threshold = min(threshold, mean_diff * 2)
+
+        clusters = [[coords[0]]]
+
+        for coord in coords[1:]:
             if coord - clusters[-1][-1] < threshold:
                 clusters[-1].append(coord)
             else:
                 clusters.append([coord])
 
-        # Return cluster centers
-        return [sum(cluster) / len(cluster) for cluster in clusters]
+        cluster_centers = [sum(cluster) / len(cluster) for cluster in clusters]
+
+        if len(cluster_centers) > 1:
+            final_centers = [cluster_centers[0]]
+            for center in cluster_centers[1:]:
+
+                if center - final_centers[-1] < threshold/2:
+                    continue
+                final_centers.append(center)
+            return final_centers
+            
+        return cluster_centers
