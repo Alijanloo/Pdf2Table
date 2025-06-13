@@ -40,29 +40,59 @@ This project aims to provide a robust solution for extracting tabular data from 
 pip install -e .
 ```
 
-## Usage
-
+### Usage
 ```python
-from table_rag.usecases.indexing_pipeline import IndexingPipeline
+from table_rag.frameworks.table_extraction_factory import TableExtractionFactory
+from table_rag.usecases.dtos import TableExtractionRequest
 
-# Initialize the pipeline
-pipeline = IndexingPipeline(pdf_path="path/to/your.pdf", es_index="your-index-name")
+# Initialize the factory
+factory = TableExtractionFactory()
+adapter = factory.create_table_extraction_adapter()
 
-# Run the pipeline
-pipeline.run()
+# Extract tables from PDF
+request = TableExtractionRequest(pdf_path="document.pdf", page_number=0)
+response = adapter.extract_tables(request)
+
+# Access extracted tables
+for table in response.tables:
+    print(f"Table with {len(table.grid.cells)} cells")
+    print(f"Grid size: {table.grid.rows} x {table.grid.columns}")
+    
+    # Convert to structured format
+    table_data = table.to_dict()
+    print(table_data)
 ```
 
-## API
 
-The application exposes a FastAPI endpoint for PDF indexing:
+## 🎯 Use Cases
 
-```bash
-# Start the API server
-uvicorn table_rag.frameworks.main:app --reload
-```
+### Document Processing Pipelines
+- **Financial Reports**: Extract financial tables from annual reports and earnings statements
+- **Research Papers**: Extract data tables from scientific publications
+- **Invoice Processing**: Extract line items and totals from invoices
+- **Government Documents**: Process regulatory filings and public documents
 
-Then POST a PDF file to `/index-pdf/` to process it.
+### Integration Scenarios
+- **RAG Systems**: Index extracted tables for question-answering systems
+- **Data Analytics**: Feed extracted data into analytical workflows  
+- **Document Management**: Enhance document search with structured table data
+- **Compliance**: Automated extraction for regulatory compliance reporting
 
-## Requirements
+## 🤝 Contributing
 
-See requirements.txt for a complete list of dependencies.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Follow Clean Architecture principles
+4. Add comprehensive tests
+5. Update documentation
+6. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- **Microsoft Research**: Table Transformer models
+- **Hugging Face**: TrOCR and Transformers library  
+- **PyMuPDF Team**: Excellent PDF processing capabilities
