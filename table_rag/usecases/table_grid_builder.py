@@ -33,12 +33,20 @@ class TableGridBuilder:
         if not detected_cells:
             return None
 
-        # Extract coordinates and cluster them
-        row_coords = [cell.box.center_y for cell in detected_cells]
-        col_coords = [cell.box.center_x for cell in detected_cells]
+        # Separate row and column cells by type
+        row_cells = [cell for cell in detected_cells if "row" in cell.cell_type.lower()]
+        col_cells = [cell for cell in detected_cells if "column" in cell.cell_type.lower()]
+
+
+
+        # Use only row/column cells for clustering, with artifact filtering for columns
+        row_coords = [cell.box.center_y for cell in row_cells]
+        filtered_col_cells = self._filter_artifact_columns(col_cells)
+        col_coords = [cell.box.center_x for cell in filtered_col_cells]
 
         rows = self._clustering_service.cluster_coordinates(row_coords)
         cols = self._clustering_service.cluster_coordinates(col_coords)
+
 
         if len(rows) < 2 or len(cols) < 2:
             return None
@@ -54,6 +62,25 @@ class TableGridBuilder:
         return TableGrid(
             cells=grid_cells, n_rows=len(rows), n_cols=len(cols), table_box=table_box
         )
+    
+    def _filter_artifact_columns(self, col_cells: list) -> list:
+        """Filter out spurious wide columns that contain other columns (artifact removal)."""
+        if len(col_cells) > 1:
+            sorted_by_width = sorted(col_cells, key=lambda c: c.box.width)
+            widest_column = sorted_by_width[-1]
+            widest_width = widest_column.box.width
+            avg_width = sum([c.box.width for c in sorted_by_width[:-1]]) / max(1, len(sorted_by_width) - 1)
+            contains_other_columns = any(
+                c != widest_column and
+                c.box.x_min >= widest_column.box.x_min and
+                c.box.x_max <= widest_column.box.x_max
+                for c in col_cells
+            )
+            if contains_other_columns or widest_width > 3 * avg_width:
+                filtered = [c for c in col_cells if c != widest_column]
+                print(f"Filtered out a wide column ({widest_width:.1f}px) that contains other columns")
+                return filtered
+        return col_cells
 
     def _create_grid_cells(
         self,
