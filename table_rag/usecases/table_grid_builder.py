@@ -29,58 +29,96 @@ class TableGridBuilder:
         page_image: PageImage,
         table_box: BoundingBox,
     ) -> Optional[TableGrid]:
-        """Build a structured grid from detected cells."""
+        """Build a structured grid from detected cells (robust, overlap-based)."""
         if not detected_cells:
             return None
 
-        # Separate row and column cells by type
-        row_cells = [cell for cell in detected_cells if "row" in cell.cell_type.lower()]
-        col_cells = [cell for cell in detected_cells if "column" in cell.cell_type.lower()]
+        # Collect all y and x edges from all detected cells
+        y_edges = set()
+        x_edges = set()
+        for cell in detected_cells:
+            y_edges.add(cell.box.y_min)
+            y_edges.add(cell.box.y_max)
+            x_edges.add(cell.box.x_min)
+            x_edges.add(cell.box.x_max)
 
-
-
-        # Use only row/column cells for clustering, with artifact filtering for columns
-        row_coords = [cell.box.center_y for cell in row_cells]
-        filtered_col_cells = self._filter_artifact_columns(col_cells)
-        col_coords = [cell.box.center_x for cell in filtered_col_cells]
-
-        rows = self._clustering_service.cluster_coordinates(row_coords)
-        cols = self._clustering_service.cluster_coordinates(col_coords)
-
-
-        if len(rows) < 2 or len(cols) < 2:
-            return None
-
-        # Create grid cells
-        grid_cells = self._create_grid_cells(
-            detected_cells, rows, cols, page_image, table_box
+        # Cluster edges to get row/col boundaries
+        row_boundaries = self._clustering_service.cluster_coordinates(
+            sorted(y_edges), threshold=10.0
+        )
+        col_boundaries = self._clustering_service.cluster_coordinates(
+            sorted(x_edges), threshold=10.0
         )
 
-        if not grid_cells:
+        # Ensure sorted and unique
+        row_boundaries = sorted(set(int(round(y)) for y in row_boundaries))
+        col_boundaries = sorted(set(int(round(x)) for x in col_boundaries))
+
+        n_rows = len(row_boundaries) - 1
+        n_cols = len(col_boundaries) - 1
+        if n_rows <= 0 or n_cols <= 0:
             return None
+
+        # Build grid: assign detected cells to grid slots by overlap
+        grid = {}
+        for cell in detected_cells:
+            c_xmin, c_ymin, c_xmax, c_ymax = (
+                cell.box.x_min,
+                cell.box.y_min,
+                cell.box.x_max,
+                cell.box.y_max,
+            )
+            for r in range(n_rows):
+                # Check vertical overlap
+                if not (c_ymax > row_boundaries[r] and c_ymin < row_boundaries[r + 1]):
+                    continue
+                for c in range(n_cols):
+                    # Check horizontal overlap
+                    if not (
+                        c_xmax > col_boundaries[c] and c_xmin < col_boundaries[c + 1]
+                    ):
+                        continue
+                    pos = (r, c)
+                    if (
+                        pos not in grid
+                        or cell.confidence_score > grid[pos].confidence_score
+                    ):
+                        grid[pos] = cell
+
+        # Fill grid cells, including empty ones
+        grid_cells = []
+        for r in range(n_rows):
+            for c in range(n_cols):
+                pos = (r, c)
+                # Compute cell bounding box
+                cell_box = BoundingBox(
+                    x_min=max(0, col_boundaries[c]),
+                    y_min=max(0, row_boundaries[r]),
+                    x_max=min(table_box.x_max, col_boundaries[c + 1]),
+                    y_max=min(table_box.y_max, row_boundaries[r + 1]),
+                )
+                if pos in grid:
+                    cell = grid[pos]
+                    confidence = cell.confidence_score
+                else:
+                    confidence = 0.0
+
+                text = ""
+                if cell_box.area > 0:
+                    text = self._extract_cell_text(cell_box, page_image)
+
+                grid_cell = GridCell(
+                    row=r,
+                    col=c,
+                    text=text,
+                    box=cell_box,
+                    confidence_score=confidence,
+                )
+                grid_cells.append(grid_cell)
 
         return TableGrid(
-            cells=grid_cells, n_rows=len(rows), n_cols=len(cols), table_box=table_box
+            cells=grid_cells, n_rows=n_rows, n_cols=n_cols, table_box=table_box
         )
-    
-    def _filter_artifact_columns(self, col_cells: list) -> list:
-        """Filter out spurious wide columns that contain other columns (artifact removal)."""
-        if len(col_cells) > 1:
-            sorted_by_width = sorted(col_cells, key=lambda c: c.box.width)
-            widest_column = sorted_by_width[-1]
-            widest_width = widest_column.box.width
-            avg_width = sum([c.box.width for c in sorted_by_width[:-1]]) / max(1, len(sorted_by_width) - 1)
-            contains_other_columns = any(
-                c != widest_column and
-                c.box.x_min >= widest_column.box.x_min and
-                c.box.x_max <= widest_column.box.x_max
-                for c in col_cells
-            )
-            if contains_other_columns or widest_width > 3 * avg_width:
-                filtered = [c for c in col_cells if c != widest_column]
-                print(f"Filtered out a wide column ({widest_width:.1f}px) that contains other columns")
-                return filtered
-        return col_cells
 
     def _create_grid_cells(
         self,
@@ -205,7 +243,9 @@ class TableGridBuilder:
             try:
                 area = (cell_box.x_min, cell_box.y_min, cell_box.x_max, cell_box.y_max)
                 rect = fitz.Rect(area)
-                selected_text = [w[4] for w in page_image.words if fitz.Rect(w[:4]).intersects(rect)]
+                selected_text = [
+                    w[4] for w in page_image.words if fitz.Rect(w[:4]).intersects(rect)
+                ]
                 if selected_text.strip():
                     return selected_text.strip()
             except Exception:
