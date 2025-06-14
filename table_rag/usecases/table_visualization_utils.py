@@ -1,4 +1,5 @@
 from typing import Optional, List
+import os
 
 import matplotlib.pyplot as plt
 from table_rag.entities.table_entities import (
@@ -12,11 +13,17 @@ from table_rag.entities.table_entities import (
 def visualize_table_detection(
     page_image: PageImage,
     detected_tables: List[DetectedTable],
-    save_path: str = None,
+    visualization_save_dir: str,
 ):
     """
     Visualize DetectedTable entities on a PageImage.
     """
+    save_path = None
+    os.makedirs(visualization_save_dir, exist_ok=True)
+    save_path = os.path.join(
+        visualization_save_dir, f"detection_page{page_image.page_number}.png"
+    )
+    
     COLORS = [
         [0.000, 0.447, 0.741],
         [0.850, 0.325, 0.098],
@@ -68,8 +75,13 @@ def visualize_table_structure(
     page_image: PageImage,
     detected_cells: List[DetectedCell],
     table_box,
-    save_path: str = None,
+    visualization_save_dir: str,
 ):
+    os.makedirs(visualization_save_dir, exist_ok=True)
+    save_path = os.path.join(
+        visualization_save_dir,
+        f"structure_page{page_image.page_number}_table{page_image.page_number}.png",
+    )
     COLORS = [
         [0.000, 0.447, 0.741],
         [0.850, 0.325, 0.098],
@@ -125,12 +137,18 @@ def visualize_table_structure(
 def visualize_cell_grid(
     table_grid: TableGrid,
     page_image: PageImage,
-    save_path: Optional[str] = None,
+    visualization_save_dir: str,
     show_text: bool = True,
 ):
     """
     Visualize a TableGrid entity on a PageImage.
     """
+    os.makedirs(visualization_save_dir, exist_ok=True)
+    save_path = os.path.join(
+        visualization_save_dir,
+        f"cellgrid_page{page_image.page_number}_table{page_image.page_number}.png",
+    )
+    
     if not table_grid or not table_grid.cells:
         print("No cells detected in grid, skipping visualization.")
         return

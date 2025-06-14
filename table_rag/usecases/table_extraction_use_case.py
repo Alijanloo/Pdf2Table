@@ -19,10 +19,8 @@ from table_rag.usecases.table_visualization_utils import (
     visualize_cell_grid,
     visualize_table_detection,
 )
-import os
 
 
-# Use Case Classes
 class TableExtractionUseCase:
     """Use case for extracting tables from PDF documents."""
 
@@ -55,16 +53,10 @@ class TableExtractionUseCase:
 
         # Visualization: Table detection
         if self._visualize:
-            save_path = None
-            if self._visualization_save_dir:
-                os.makedirs(self._visualization_save_dir, exist_ok=True)
-                save_path = os.path.join(
-                    self._visualization_save_dir, f"detection_page{page_number}.png"
-                )
             visualize_table_detection(
                 page_image,
                 detected_tables,
-                save_path=save_path,
+                visualization_save_dir=self._visualization_save_dir,
             )
 
         # Process each detected table
@@ -93,18 +85,11 @@ class TableExtractionUseCase:
 
         # Visualization: Table structure
         if self._visualize:
-            save_path = None
-            if self._visualization_save_dir:
-                os.makedirs(self._visualization_save_dir, exist_ok=True)
-                save_path = os.path.join(
-                    self._visualization_save_dir,
-                    f"structure_page{page_image.page_number}_table{table_idx}.png",
-                )
             visualize_table_structure(
                 page_image,
                 detected_cells,
                 detected_table.detection_box,
-                save_path=save_path,
+                self._visualization_save_dir
             )
 
         # Validate detected structure
@@ -119,17 +104,10 @@ class TableExtractionUseCase:
 
         # Visualization: Cell grid
         if self._visualize and table_grid:
-            save_path = None
-            if self._visualization_save_dir:
-                os.makedirs(self._visualization_save_dir, exist_ok=True)
-                save_path = os.path.join(
-                    self._visualization_save_dir,
-                    f"cellgrid_page{page_image.page_number}_table{table_idx}.png",
-                )
             visualize_cell_grid(
                 table_grid,
                 page_image,
-                save_path=save_path,
+                visualization_save_dir=self._visualization_save_dir,
                 show_text=True,
             )
 
