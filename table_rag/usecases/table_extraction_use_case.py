@@ -14,6 +14,12 @@ from table_rag.usecases.interfaces.framework_interfaces import (
     TableStructureRecognizerInterface,
     OCRInterface,
 )
+from table_rag.usecases.table_visualization_utils import (
+    visualize_table_structure,
+    visualize_cell_grid,
+    visualize_table_detection,
+)
+import os
 
 
 # Use Case Classes
@@ -26,12 +32,16 @@ class TableExtractionUseCase:
         table_detector: TableDetectorInterface,
         structure_recognizer: TableStructureRecognizerInterface,
         ocr_service: OCRInterface,
+        visualize: bool = False,
+        visualization_save_dir: str = None,
     ):
         self._pdf_extractor = pdf_extractor
         self._table_detector = table_detector
         self._structure_recognizer = structure_recognizer
         self._ocr_service = ocr_service
         self._validation_service = TableValidationService()
+        self._visualize = visualize
+        self._visualization_save_dir = visualization_save_dir
 
     def extract_tables_from_page(
         self, pdf_path: str, page_number: int
@@ -43,11 +53,27 @@ class TableExtractionUseCase:
         # Detect tables
         detected_tables = self._table_detector.detect_tables(page_image)
 
+        # Visualization: Table detection
+        if self._visualize:
+            save_path = None
+            if self._visualization_save_dir:
+                os.makedirs(self._visualization_save_dir, exist_ok=True)
+                save_path = os.path.join(
+                    self._visualization_save_dir, f"detection_page{page_number}.png"
+                )
+            visualize_table_detection(
+                page_image,
+                detected_tables,
+                save_path=save_path,
+            )
+
         # Process each detected table
         structured_tables = []
-        for table in detected_tables:
+        for idx, table in enumerate(detected_tables):
             try:
-                structured_table = self._process_detected_table(page_image, table)
+                structured_table = self._process_detected_table(
+                    page_image, table, table_idx=idx
+                )
                 if structured_table:
                     structured_tables.append(structured_table)
             except Exception as e:
@@ -57,13 +83,29 @@ class TableExtractionUseCase:
         return structured_tables
 
     def _process_detected_table(
-        self, page_image: PageImage, detected_table: DetectedTable
+        self, page_image: PageImage, detected_table: DetectedTable, table_idx: int = 0
     ) -> Optional[DetectedTable]:
         """Process a single detected table to extract its structure."""
         # Recognize table structure
         detected_cells = self._structure_recognizer.recognize_structure(
             page_image, detected_table.detection_box
         )
+
+        # Visualization: Table structure
+        if self._visualize:
+            save_path = None
+            if self._visualization_save_dir:
+                os.makedirs(self._visualization_save_dir, exist_ok=True)
+                save_path = os.path.join(
+                    self._visualization_save_dir,
+                    f"structure_page{page_image.page_number}_table{table_idx}.png",
+                )
+            visualize_table_structure(
+                page_image,
+                detected_cells,
+                detected_table.detection_box,
+                save_path=save_path,
+            )
 
         # Validate detected structure
         if not self._validation_service.is_valid_table_structure(detected_cells):
@@ -74,6 +116,22 @@ class TableExtractionUseCase:
         table_grid = grid_builder.build_grid(
             detected_cells, page_image, detected_table.detection_box
         )
+
+        # Visualization: Cell grid
+        if self._visualize and table_grid:
+            save_path = None
+            if self._visualization_save_dir:
+                os.makedirs(self._visualization_save_dir, exist_ok=True)
+                save_path = os.path.join(
+                    self._visualization_save_dir,
+                    f"cellgrid_page{page_image.page_number}_table{table_idx}.png",
+                )
+            visualize_cell_grid(
+                table_grid,
+                page_image,
+                save_path=save_path,
+                show_text=True,
+            )
 
         if not table_grid:
             return None
