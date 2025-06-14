@@ -69,7 +69,7 @@ class TableGridBuilder:
                 cell.box.y_max,
             )
             for r in range(n_rows):
-                # Check vertical overlap
+                # Check if the cell vertically overlaps with the current grid row, skip if not
                 if not (c_ymax > row_boundaries[r] and c_ymin < row_boundaries[r + 1]):
                     continue
                 for c in range(n_cols):
@@ -243,9 +243,13 @@ class TableGridBuilder:
             try:
                 area = (cell_box.x_min, cell_box.y_min, cell_box.x_max, cell_box.y_max)
                 rect = fitz.Rect(area)
-                selected_text = [
-                    w[4] for w in page_image.words if fitz.Rect(w[:4]).intersects(rect)
-                ]
+                selected_text = " ".join(
+                    [
+                        w[4]
+                        for w in page_image.words
+                        if fitz.Rect(w[:4]).intersects(rect)
+                    ]
+                )
                 if selected_text.strip():
                     return selected_text.strip()
             except Exception:
