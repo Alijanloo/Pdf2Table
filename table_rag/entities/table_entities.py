@@ -189,6 +189,7 @@ class PageImage(BaseModel):
     page_number: int = Field(..., ge=0)
     image_data: np.ndarray
     source_file: str
+    words: List
 
     class Config:
         arbitrary_types_allowed = True

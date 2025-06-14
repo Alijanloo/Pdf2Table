@@ -1,4 +1,5 @@
 from typing import List, Optional
+import fitz
 
 from table_rag.entities.table_entities import (
     PageImage,
@@ -171,13 +172,22 @@ class TableGridBuilder:
         )
 
     def _extract_cell_text(self, cell_box: BoundingBox, page_image: PageImage) -> str:
-        """Extract text from cell using OCR."""
+        """Extract text from cell using direct PDF extraction if possible, else OCR."""
         try:
-            # Crop image to cell boundaries
+            # Try direct PDF text extraction using PyMuPDF
+            try:
+                area = (cell_box.x_min, cell_box.y_min, cell_box.x_max, cell_box.y_max)
+                rect = fitz.Rect(area)
+                selected_text = [w[4] for w in page_image.words if fitz.Rect(w[:4]).intersects(rect)]
+                if selected_text.strip():
+                    return selected_text.strip()
+            except Exception:
+                pass  # Fallback to OCR if direct extraction fails
+
+            # Fallback: Crop image and use OCR
             crop = page_image.image_data[
                 cell_box.y_min : cell_box.y_max, cell_box.x_min : cell_box.x_max
             ]
-
             if crop.size > 0 and crop.shape[0] > 0 and crop.shape[1] > 0:
                 return self._ocr_service.extract_text(crop)
             else:
