@@ -15,7 +15,8 @@ class TableExtractionFactory:
         device: str = "cpu",
         detection_threshold: float = 0.9,
         structure_threshold: float = 0.6,
-        pdf_dpi: int = 300
+        pdf_dpi: int = 300,
+        load_ocr: bool = False
     ) -> TableExtractionAdapter:
         """Create a fully configured table extraction adapter."""
         
@@ -29,7 +30,10 @@ class TableExtractionFactory:
             device=device,
             confidence_threshold=structure_threshold
         )
-        ocr_service = TrOCRService(device=device)
+        if load_ocr:
+            ocr_service = TrOCRService(device=device) 
+        else:
+            ocr_service = None
         
         # Create use case (application layer)
         table_extraction_use_case = TableExtractionUseCase(
