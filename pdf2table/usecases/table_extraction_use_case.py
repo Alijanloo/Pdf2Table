@@ -1,20 +1,20 @@
 from typing import List, Optional
 
-from table_rag.entities.table_entities import (
+from pdf2table.entities.table_entities import (
     PageImage,
     DetectedTable,
 )
-from table_rag.usecases.services.table_services import (
+from pdf2table.usecases.services.table_services import (
     TableValidationService,
 )
-from table_rag.usecases.table_grid_builder import TableGridBuilder
-from table_rag.usecases.interfaces.framework_interfaces import (
+from pdf2table.usecases.table_grid_builder import TableGridBuilder
+from pdf2table.usecases.interfaces.framework_interfaces import (
     PDFImageExtractorInterface,
     TableDetectorInterface,
     TableStructureRecognizerInterface,
     OCRInterface,
 )
-from table_rag.usecases.table_visualization_utils import (
+from pdf2table.usecases.table_visualization_utils import (
     visualize_table_structure,
     visualize_cell_grid,
     visualize_table_detection,

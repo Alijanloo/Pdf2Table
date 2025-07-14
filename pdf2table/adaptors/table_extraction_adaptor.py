@@ -1,5 +1,5 @@
-from table_rag.usecases.dtos import TableExtractionRequest, TableExtractionResponse
-from table_rag.usecases.table_extraction_use_case import TableExtractionUseCase
+from pdf2table.usecases.dtos import TableExtractionRequest, TableExtractionResponse
+from pdf2table.usecases.table_extraction_use_case import TableExtractionUseCase
 
 
 class TableExtractionAdapter:

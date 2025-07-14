@@ -8,14 +8,14 @@ from unittest.mock import Mock
 import numpy as np
 
 # Test imports
-from table_rag.entities.table_entities import (
+from pdf2table.entities.table_entities import (
     BoundingBox, DetectedCell, GridCell, TableGrid, DetectedTable
 )
-from table_rag.usecases.services.table_services import (
+from pdf2table.usecases.services.table_services import (
     TableValidationService, CoordinateClusteringService
 )
-from table_rag.usecases.table_extraction_use_case import TableExtractionUseCase
-from table_rag.usecases.dtos import (
+from pdf2table.usecases.table_extraction_use_case import TableExtractionUseCase
+from pdf2table.usecases.dtos import (
     TableExtractionRequest, TableExtractionResponse, TableExtractionAdapter
 )
 

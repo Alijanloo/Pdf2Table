@@ -1,12 +1,12 @@
-from table_rag.usecases.table_extraction_use_case import TableExtractionUseCase
-from table_rag.usecases.dtos import TableExtractionRequest
-from table_rag.adaptors.table_extraction_adaptor import TableExtractionAdapter
-from table_rag.frameworks.pdf_image_extractor import PyMuPDFImageExtractor
-from table_rag.frameworks.table_transformer_detector import TableTransformerDetector
-from table_rag.frameworks.table_structure_recognizer import (
+from pdf2table.usecases.table_extraction_use_case import TableExtractionUseCase
+from pdf2table.usecases.dtos import TableExtractionRequest
+from pdf2table.adaptors.table_extraction_adaptor import TableExtractionAdapter
+from pdf2table.frameworks.pdf_image_extractor import PyMuPDFImageExtractor
+from pdf2table.frameworks.table_transformer_detector import TableTransformerDetector
+from pdf2table.frameworks.table_structure_recognizer import (
     TableTransformerStructureRecognizer,
 )
-from table_rag.frameworks.ocr_service import TrOCRService
+from pdf2table.frameworks.ocr_service import TrOCRService
 
 
 class TableExtractionFactory:
@@ -73,7 +73,7 @@ class TableExtractionService:
 
     def extract_tables_from_pdf(self, pdf_path: str) -> list[dict]:
         """Extract tables from all pages of a PDF."""
-        from table_rag.frameworks.pdf_image_extractor import PyMuPDFImageExtractor
+        from pdf2table.frameworks.pdf_image_extractor import PyMuPDFImageExtractor
 
         # Get page count
         pdf_extractor = PyMuPDFImageExtractor()

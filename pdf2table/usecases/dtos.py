@@ -1,6 +1,6 @@
 from typing import List
 
-from table_rag.entities.table_entities import  DetectedTable
+from pdf2table.entities.table_entities import  DetectedTable
 
 
 class TableExtractionRequest:    

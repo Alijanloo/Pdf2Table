@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
-from table_rag.usecases.interfaces.framework_interfaces import OCRInterface
+from pdf2table.usecases.interfaces.framework_interfaces import OCRInterface
 
 
 class TrOCRService(OCRInterface):

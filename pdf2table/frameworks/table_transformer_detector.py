@@ -2,8 +2,8 @@ import torch
 from typing import List
 from transformers import DetrFeatureExtractor, TableTransformerForObjectDetection
 
-from table_rag.entities.table_entities import PageImage, DetectedTable, BoundingBox
-from table_rag.usecases.interfaces.framework_interfaces import TableDetectorInterface
+from pdf2table.entities.table_entities import PageImage, DetectedTable, BoundingBox
+from pdf2table.usecases.interfaces.framework_interfaces import TableDetectorInterface
 
 
 class TableTransformerDetector(TableDetectorInterface):

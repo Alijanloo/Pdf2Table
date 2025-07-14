@@ -2,13 +2,13 @@ import unittest
 from unittest.mock import Mock
 import numpy as np
 
-from table_rag.entities.table_entities import (
+from pdf2table.entities.table_entities import (
     PageImage,
     DetectedCell,
     BoundingBox,
     TableGrid,
 )
-from table_rag.usecases.table_extraction_use_case import (
+from pdf2table.usecases.table_extraction_use_case import (
     TableGridBuilder,
 )
 

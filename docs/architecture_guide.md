@@ -2,7 +2,7 @@
 
 ## Directory Structure
 ```
-table_rag/
+pdf2table/
 ├── entities/
 │   └── table_entities.py
 ├── usecases/
@@ -22,7 +22,7 @@ table_rag/
 
 ## Architecture Layers
 
-### 1. Entities Layer (`table_rag/entities/`)
+### 1. Entities Layer (`pdf2table/entities/`)
 - **table_entities.py**: Core business entities and domain services
   - `BoundingBox`: Value object for coordinates
   - `DetectedCell`: Detected table cell entity
@@ -31,7 +31,7 @@ table_rag/
   - `DetectedTable`: Detected table with metadata
   - `PageImage`: PDF page image entity
 
-### 2. Use Cases Layer (`table_rag/usecases/`)
+### 2. Use Cases Layer (`pdf2table/usecases/`)
 - **table_extraction_use_case.py**: Application business logic
   - `TableExtractionUseCase`: Orchestrates table extraction workflow
   - `TableGridBuilder`: Builds structured grids from detected cells
@@ -43,12 +43,12 @@ table_rag/
   - `TableExtractionRequest`: Request DTO for table extraction
   - `TableExtractionResponse`: Response DTO for table extraction
 
-### 3. Interface Adapters Layer (`table_rag/adaptors/`)
+### 3. Interface Adapters Layer (`pdf2table/adaptors/`)
 - **table_extraction_ports.py**: Abstract interfaces and DTOs
   - Port interfaces: `PDFImageExtractorPort`, `TableDetectorPort`, etc.
   - `TableExtractionAdapter`: Coordinates between use cases and external interfaces
 
-### 4. Frameworks & Drivers Layer (`table_rag/frameworks/`)
+### 4. Frameworks & Drivers Layer (`pdf2table/frameworks/`)
 - **pdf_image_extractor.py**: PyMuPDF implementation
 - **table_transformer_detector.py**: Table detection using Transformer models
 - **table_structure_recognizer.py**: Structure recognition using Transformer models
@@ -58,7 +58,7 @@ table_rag/
 
 ### Usage (Simple)
 ```python
-from table_rag.frameworks.table_extraction_factory import TableExtractionService
+from pdf2table.frameworks.table_extraction_factory import TableExtractionService
 
 service = TableExtractionService(device="cpu")
 result = service.extract_tables_from_page(pdf_path, page_number)
@@ -67,8 +67,8 @@ tables = result["tables"]
 
 ### Usage (Advanced)
 ```python
-from table_rag.frameworks.table_extraction_factory import TableExtractionFactory
-from table_rag.usecases.dtos import TableExtractionRequest
+from pdf2table.frameworks.table_extraction_factory import TableExtractionFactory
+from pdf2table.usecases.dtos import TableExtractionRequest
 
 # Create with custom configuration
 adapter = TableExtractionFactory.create_table_extraction_adapter(

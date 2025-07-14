@@ -5,8 +5,8 @@ Test table extraction on actual PDF file
 
 import os
 
-from table_rag.frameworks.table_extraction_factory import TableExtractionFactory
-from table_rag.usecases.dtos import TableExtractionRequest
+from pdf2table.frameworks.table_extraction_factory import TableExtractionFactory
+from pdf2table.usecases.dtos import TableExtractionRequest
 
 
 def test_actual_table_extraction():

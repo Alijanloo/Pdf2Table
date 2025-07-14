@@ -1,17 +1,17 @@
 from typing import List, Optional
 import fitz
 
-from table_rag.entities.table_entities import (
+from pdf2table.entities.table_entities import (
     PageImage,
     DetectedCell,
     TableGrid,
     GridCell,
     BoundingBox,
 )
-from table_rag.usecases.services.table_services import (
+from pdf2table.usecases.services.table_services import (
     CoordinateClusteringService,
 )
-from table_rag.usecases.interfaces.framework_interfaces import (
+from pdf2table.usecases.interfaces.framework_interfaces import (
     OCRInterface,
 )
 

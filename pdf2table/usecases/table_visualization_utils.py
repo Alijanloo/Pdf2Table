@@ -2,7 +2,7 @@ from typing import Optional, List
 import os
 
 import matplotlib.pyplot as plt
-from table_rag.entities.table_entities import (
+from pdf2table.entities.table_entities import (
     PageImage,
     TableGrid,
     DetectedTable,

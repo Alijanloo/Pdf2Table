@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import fitz
 
-from table_rag.entities.table_entities import PageImage
-from table_rag.usecases.interfaces.framework_interfaces import (
+from pdf2table.entities.table_entities import PageImage
+from pdf2table.usecases.interfaces.framework_interfaces import (
     PDFImageExtractorInterface,
 )
 

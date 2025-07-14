@@ -1,4 +1,4 @@
-# TableRag
+# Pdf2Table
 
 A RAG (Retrieval-Augmented Generation) application for detecting, extracting, and indexing tables from PDF documents and finally inferring on them.
 
@@ -24,7 +24,7 @@ This project aims to provide a robust solution for extracting tabular data from 
 
 ## Project Structure
 
-- `table_rag/`: Main package
+- `pdf2table/`: Main package
   - `adaptors/`: Interface with external systems (Elasticsearch, PDF reader, Table Transformer)
   - `entities/`: Domain models
   - `usecases/`: Application logic
@@ -42,8 +42,8 @@ pip install -e .
 
 ### Usage
 ```python
-from table_rag.frameworks.table_extraction_factory import TableExtractionFactory
-from table_rag.usecases.dtos import TableExtractionRequest
+from pdf2table.frameworks.table_extraction_factory import TableExtractionFactory
+from pdf2table.usecases.dtos import TableExtractionRequest
 
 # Initialize the factory
 factory = TableExtractionFactory()

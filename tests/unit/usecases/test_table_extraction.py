@@ -2,10 +2,10 @@ import unittest
 from unittest.mock import Mock
 import numpy as np
 
-from table_rag.entities.table_entities import (
+from pdf2table.entities.table_entities import (
     PageImage, DetectedTable, DetectedCell, BoundingBox
 )
-from table_rag.usecases.table_extraction_use_case import TableExtractionUseCase
+from pdf2table.usecases.table_extraction_use_case import TableExtractionUseCase
 
 
 class TestTableExtractionUseCase(unittest.TestCase):

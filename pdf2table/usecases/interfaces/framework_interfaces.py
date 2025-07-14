@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 import numpy as np
 
-from table_rag.entities.table_entities import (
+from pdf2table.entities.table_entities import (
     PageImage, DetectedTable, DetectedCell, BoundingBox
 )
 
