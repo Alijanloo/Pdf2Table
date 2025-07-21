@@ -1,16 +1,13 @@
 # Pdf2Table
 
-A RAG (Retrieval-Augmented Generation) application for detecting, extracting, and indexing tables from PDF documents and finally inferring on them.
+A Python library for detecting, extracting, and processing tables from PDF documents.
 
 ## Overview
 
-This project aims to provide a robust solution for extracting tabular data from PDF documents and indexing it for efficient retrieval. The application utilizes various technologies, including FastAPI for the web framework, Elasticsearch for indexing and searching, and LangChain for text chunking and processing.
+This project provides a robust solution for extracting tabular data from PDF documents. The library utilizes advanced computer vision models to detect and recognize table structures, making it easy to convert PDF tables into structured data formats.
 
 ## Technologies Used
 
-- **FastAPI**: For building the web application.
-- **Elasticsearch**: For storing and retrieving indexed data.
-- **LangChain**: For text chunking and processing.
 - **Table Transformer**: For recognizing table structures in PDF documents.
 - **PyMuPDF**: For reading PDF files.
 
@@ -18,17 +15,15 @@ This project aims to provide a robust solution for extracting tabular data from 
 
 - PDF processing with page-by-page table detection
 - Table structure recognition using Table Transformer
-- Text chunking with LangChain's character splitter
-- Elasticsearch indexing for structured retrieval
 - Clean architecture with separation of concerns
 
 ## Project Structure
 
 - `pdf2table/`: Main package
-  - `adaptors/`: Interface with external systems (Elasticsearch, PDF reader, Table Transformer)
+  - `adaptors/`: Interface with external systems(PDF reader, Table Transformer)
   - `entities/`: Domain models
   - `usecases/`: Application logic
-  - `frameworks/`: UI and infrastructure (FastAPI)
+  - `frameworks/`: UI and infrastructure
 - `tests/`: Unit tests
   - `adaptors/`: Tests for adaptors
   - `samples/`: Sample PDFs for testing
@@ -63,6 +58,33 @@ for table in response.tables:
     print(table_data)
 ```
 
+### High-Level Usage
+
+For simpler integration, use the high-level `TableExtractionService`:
+
+```python
+from pdf2table.frameworks.table_extraction_factory import TableExtractionService
+
+# Initialize the service
+service = TableExtractionService(device="cpu")
+
+# Extract tables from a single page
+page_result = service.extract_tables_from_page("document.pdf", page_number=0)
+print(f"Found {len(page_result['tables'])} tables on page 0")
+
+# Extract tables from entire PDF
+all_results = service.extract_tables_from_pdf("document.pdf")
+for page_idx, page_result in enumerate(all_results):
+    if page_result.get('success', True):
+        tables = page_result.get('tables', [])
+        print(f"Page {page_idx}: Found {len(tables)} tables")
+        
+        # Process each table
+        for table_idx, table in enumerate(tables):
+            print(f"  Table {table_idx + 1}: {table['rows']} rows x {table['columns']} columns")
+    else:
+        print(f"Page {page_idx}: Error - {page_result.get('error', 'Unknown error')}")
+```
 
 ## 🎯 Use Cases
 
@@ -73,10 +95,10 @@ for table in response.tables:
 - **Government Documents**: Process regulatory filings and public documents
 
 ### Integration Scenarios
-- **RAG Systems**: Index extracted tables for question-answering systems
 - **Data Analytics**: Feed extracted data into analytical workflows  
 - **Document Management**: Enhance document search with structured table data
 - **Compliance**: Automated extraction for regulatory compliance reporting
+- **Business Intelligence**: Convert PDF reports into structured datasets for analysis
 
 ## 🤝 Contributing
 
