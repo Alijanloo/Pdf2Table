@@ -1,6 +1,10 @@
 data
 table_visualizations
 
+# Log files
+logs/
+*.log
+
 __pycache__/
 *.py[cod]
 *.egg-info/

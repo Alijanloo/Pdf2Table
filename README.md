@@ -86,6 +86,16 @@ for page_idx, page_result in enumerate(all_results):
         print(f"Page {page_idx}: Error - {page_result.get('error', 'Unknown error')}")
 ```
 
+## 📋 Logging
+
+The project includes comprehensive logging capabilities for debugging and monitoring:
+
+**Log Files**: By default, logs are written to:
+- `logs/pdf2table.log` - Main application log
+- `logs/pdf2table_errors.log` - Error-only log
+
+**Documentation**: See `docs/logging_guide.md` for detailed logging documentation.
+
 ## 🎯 Use Cases
 
 ### Document Processing Pipelines
