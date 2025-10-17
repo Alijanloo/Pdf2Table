@@ -6,16 +6,14 @@ pdf2table/
 ├── entities/
 │   └── table_entities.py
 ├── usecases/
-│   ├── dtos.py
 │   ├── services/
 │   │   └── table_services.py
+│   ├── interfaces/
 │   └── table_extraction_use_case.py
-├── adaptors/
-│   └── table_extraction_ports.py
 ├── frameworks/
 │   ├── ocr_service.py
 │   ├── pdf_image_extractor.py
-│   ├── table_extraction_factory.py
+│   ├── pipeline.py
 │   ├── table_structure_recognizer.py
 │   └── table_transformer_detector.py
 ```
@@ -35,57 +33,44 @@ pdf2table/
 - **table_extraction_use_case.py**: Application business logic
   - `TableExtractionUseCase`: Orchestrates table extraction workflow
     - `extract_tables(pdf_path, page_number=None)`: Main extraction method
+    - Returns list of `DetectedTable` objects
   - `TableGridBuilder`: Builds structured grids from detected cells
   - Contains the core algorithms for grouping rows/columns and building grids
 - **services/table_services.py**: Supporting services for use cases
   - `TableValidationService`: Validates detected table structures and cells
   - `CoordinateClusteringService`: Clusters coordinates for row/column grouping
-- **dtos.py**: Data transfer objects for use cases
-  - `TableExtractionResponse`: Response DTO for table extraction
+- **interfaces/**: Port interfaces for dependency inversion
 
-### 3. Interface Adapters Layer (`pdf2table/adaptors/`)
-- **table_extraction_adaptor.py**: Adapter for table extraction
-  - `TableExtractionAdapter`: Coordinates between use cases and external interfaces
-    - `extract_tables(pdf_path, page_number=None)`: Main adapter method
-      - Accepts `pdf_path` and optional `page_number`
-      - Returns `TableExtractionResponse`
-
-### 4. Frameworks & Drivers Layer (`pdf2table/frameworks/`)
+### 3. Frameworks & Drivers Layer (`pdf2table/frameworks/`)
 - **pdf_image_extractor.py**: PyMuPDF implementation
 - **table_transformer_detector.py**: Table detection using Transformer models
 - **table_structure_recognizer.py**: Structure recognition using Transformer models
 - **ocr_service.py**: TrOCR text extraction
-- **table_extraction_factory.py**: Dependency injection and configuration
+- **pipeline.py**: Factory for creating configured pipelines
 
+## Usage
 
-### Usage (Simple)
 ```python
-from pdf2table.frameworks.table_extraction_factory import TableExtractionService
+from pdf2table.frameworks.pipeline import create_pipeline
 
-service = TableExtractionService(device="cpu")
-
-# Extract from a specific page
-result = service.extract_tables_from_page(pdf_path, page_number=0)
-tables = result["tables"]
-
-# Or extract from all pages
-all_results = service.extract_tables_from_pdf(pdf_path)
-```
-
-### Usage (Advanced)
-```python
-from pdf2table.frameworks.table_extraction_factory import TableExtractionFactory
-
-# Create with custom configuration
-adapter = TableExtractionFactory.create_table_extraction_adapter(
-    device="cuda",
-    detection_threshold=0.95,
-    structure_threshold=0.7
+# Create the extraction pipeline
+use_case = create_pipeline(
+    device="cpu",
+    detection_threshold=0.9,
+    structure_threshold=0.6,
+    pdf_dpi=300,
+    load_ocr=False,
+    visualize=False
 )
 
 # Extract from a specific page
-response = adapter.extract_tables(pdf_path, page_number=0)
+tables = use_case.extract_tables(pdf_path, page_number=0)
 
 # Or extract from all pages
-response = adapter.extract_tables(pdf_path)
+all_tables = use_case.extract_tables(pdf_path)
+
+# Process the results
+for table in tables:
+    print(f"Found table with {table.grid.n_rows} rows and {table.grid.n_cols} columns")
+    table_dict = table.to_dict()
 ```

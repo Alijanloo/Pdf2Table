@@ -15,8 +15,6 @@ from pdf2table.usecases.services.table_services import (
     TableValidationService, CoordinateClusteringService
 )
 from pdf2table.usecases.table_extraction_use_case import TableExtractionUseCase
-from pdf2table.usecases.dtos import TableExtractionResponse
-from pdf2table.adaptors.table_extraction_adaptor import TableExtractionAdapter
 
 
 class TestCleanArchitectureCore(unittest.TestCase):
@@ -46,31 +44,9 @@ class TestCleanArchitectureCore(unittest.TestCase):
         ]
         self.assertTrue(TableValidationService.is_valid_table_structure(cells))
 
-        # Test CoordinateClusteringService
         coords = [10.0, 12.0, 50.0, 52.0]
         clusters = CoordinateClusteringService.cluster_coordinates(coords, threshold=5.0)
         self.assertEqual(len(clusters), 2)
-    
-    def test_interface_adapters_layer_complete(self):
-        """Test all interface adapters functionality"""
-        # Test response DTOs
-        tables = [Mock()]
-        response = TableExtractionResponse(
-            tables=tables,
-            source_file="/test/file.pdf"
-        )
-        self.assertTrue(response.success)
-        self.assertEqual(len(response.tables), 1)
-        
-        # Test adapter coordination
-        mock_use_case = Mock()
-        mock_use_case.extract_tables.return_value = tables
-        
-        adapter = TableExtractionAdapter(mock_use_case)
-        result = adapter.extract_tables("/test/file.pdf", page_number=0)
-        
-        self.assertIsInstance(result, TableExtractionResponse)
-        self.assertTrue(result.success)
     
     def test_use_case_layer_with_simple_mocks(self):
         """Test use case layer with simplified mocking"""

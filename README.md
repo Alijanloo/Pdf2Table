@@ -37,51 +37,45 @@ pip install -e .
 
 ### Usage
 ```python
-from pdf2table.frameworks.table_extraction_factory import TableExtractionFactory
+from pdf2table.frameworks.pipeline import create_pipeline
 
-# Initialize the factory
-factory = TableExtractionFactory()
-adapter = factory.create_table_extraction_adapter()
+# Create the extraction pipeline with configuration
+pipeline = create_pipeline(
+    device="cpu",
+    detection_threshold=0.9,
+    structure_threshold=0.6,
+    pdf_dpi=300,
+    load_ocr=False,
+    visualize=False
+)
 
 # Extract tables from a specific page
-response = adapter.extract_tables(pdf_path="document.pdf", page_number=0)
+tables = pipeline.extract_tables(pdf_path="document.pdf", page_number=0)
 
 # Or extract tables from all pages
-response = adapter.extract_tables(pdf_path="document.pdf")
+all_tables = pipeline.extract_tables(pdf_path="document.pdf")
 
 # Access extracted tables
-for table in response.tables:
+for table in tables:
     print(f"Table with {len(table.grid.cells)} cells")
-    print(f"Grid size: {table.grid.rows} x {table.grid.columns}")
+    print(f"Grid size: {table.grid.n_rows} x {table.grid.n_cols}")
     
     # Convert to structured format
     table_data = table.to_dict()
     print(table_data)
 ```
 
-### High-Level Usage
+### Configuration Options
 
-For simpler integration, use the high-level `TableExtractionService`:
+The `create_pipeline()` method accepts the following parameters:
 
-```python
-from pdf2table.frameworks.table_extraction_factory import TableExtractionService
-
-# Initialize the service
-service = TableExtractionService(device="cpu")
-
-# Extract tables from a single page
-page_result = service.extract_tables_from_page("document.pdf", page_number=0)
-print(f"Found {len(page_result['tables'])} tables on page 0")
-
-# Extract tables from entire PDF (all pages)
-all_results = service.extract_tables_from_pdf("document.pdf")
-tables = all_results.get('tables', [])
-print(f"Found {len(tables)} total tables across all pages")
-
-# Process each table
-for table_idx, table in enumerate(tables):
-    print(f"  Table {table_idx + 1}: {table['metadata']}")
-```
+- `device` (str): Device for ML models - "cpu" or "cuda" (default: "cpu")
+- `detection_threshold` (float): Confidence threshold for table detection (default: 0.9)
+- `structure_threshold` (float): Confidence threshold for structure recognition (default: 0.6)
+- `pdf_dpi` (int): DPI for PDF page rendering (default: 300)
+- `load_ocr` (bool): Whether to load OCR service (default: False)
+- `visualize` (bool): Whether to enable visualization (default: False)
+- `visualization_save_dir` (str): Directory to save visualizations (default: "data/table_visualizations")
 
 ## 📋 Logging
 
