@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 from pdf2table.entities.table_entities import  DetectedTable
@@ -38,4 +39,14 @@ class TableExtractionResponse:
                 for table in self.tables
             ]
         }
+    
+    def save_to_json(self, output_path: str):
+        """
+        Save the extraction response to a JSON file.
+        
+        Args:
+            output_path: Path where the JSON file will be saved
+        """
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(self.to_dict(), f, indent=2, ensure_ascii=False)
 

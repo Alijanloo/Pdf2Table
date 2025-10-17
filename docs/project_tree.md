@@ -6,6 +6,7 @@ pdf2table/
 ├── entities/
 │   └── table_entities.py
 ├── usecases/
+│   ├── dtos.py
 │   ├── services/
 │   │   └── table_services.py
 │   ├── interfaces/
@@ -33,9 +34,11 @@ pdf2table/
 - **table_extraction_use_case.py**: Application business logic
   - `TableExtractionUseCase`: Orchestrates table extraction workflow
     - `extract_tables(pdf_path, page_number=None)`: Main extraction method
-    - Returns list of `DetectedTable` objects
+    - Returns `TableExtractionResponse` object with extracted tables and metadata
   - `TableGridBuilder`: Builds structured grids from detected cells
   - Contains the core algorithms for grouping rows/columns and building grids
+- **dtos.py**: Data Transfer Objects
+  - `TableExtractionResponse`: Response object for table extraction
 - **services/table_services.py**: Supporting services for use cases
   - `TableValidationService`: Validates detected table structures and cells
   - `CoordinateClusteringService`: Clusters coordinates for row/column grouping
@@ -64,13 +67,20 @@ use_case = create_pipeline(
 )
 
 # Extract from a specific page
-tables = use_case.extract_tables(pdf_path, page_number=0)
+response = use_case.extract_tables(pdf_path, page_number=0)
 
 # Or extract from all pages
-all_tables = use_case.extract_tables(pdf_path)
+response = use_case.extract_tables(pdf_path)
 
-# Process the results
-for table in tables:
-    print(f"Found table with {table.grid.n_rows} rows and {table.grid.n_cols} columns")
-    table_dict = table.to_dict()
+# Check if extraction was successful
+if response.success:
+    # Process the results
+    for table in response.tables:
+        print(f"Found table with {table.grid.n_rows} rows and {table.grid.n_cols} columns")
+        table_dict = table.to_dict()
+    
+    # Save to JSON file
+    response.save_to_json("output/tables.json")
+else:
+    print(f"Error: {response.error_message}")
 ```

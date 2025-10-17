@@ -17,17 +17,6 @@ This project provides a robust solution for extracting tabular data from PDF doc
 - Table structure recognition using Table Transformer
 - Clean architecture with separation of concerns
 
-## Project Structure
-
-- `pdf2table/`: Main package
-  - `adaptors/`: Interface with external systems(PDF reader, Table Transformer)
-  - `entities/`: Domain models
-  - `usecases/`: Application logic
-  - `frameworks/`: UI and infrastructure
-- `tests/`: Unit tests
-  - `adaptors/`: Tests for adaptors
-  - `samples/`: Sample PDFs for testing
-
 ## Installation
 
 ```bash
@@ -50,19 +39,28 @@ pipeline = create_pipeline(
 )
 
 # Extract tables from a specific page
-tables = pipeline.extract_tables(pdf_path="document.pdf", page_number=0)
+response = pipeline.extract_tables(pdf_path="document.pdf", page_number=0)
 
 # Or extract tables from all pages
-all_tables = pipeline.extract_tables(pdf_path="document.pdf")
+response = pipeline.extract_tables(pdf_path="document.pdf")
 
-# Access extracted tables
-for table in tables:
-    print(f"Table with {len(table.grid.cells)} cells")
-    print(f"Grid size: {table.grid.n_rows} x {table.grid.n_cols}")
+# Check if extraction was successful
+if response.success:
+    print(f"Successfully extracted {len(response.tables)} tables")
     
-    # Convert to structured format
-    table_data = table.to_dict()
-    print(table_data)
+    # Access extracted tables
+    for table in response.tables:
+        print(f"Table with {len(table.grid.cells)} cells")
+        print(f"Grid size: {table.grid.n_rows} x {table.grid.n_cols}")
+    
+    # Convert to dictionary format
+    result_dict = response.to_dict()
+    print(result_dict)
+    
+    # Save results to JSON file
+    response.save_to_json("output/extracted_tables.json")
+else:
+    print(f"Extraction failed: {response.error_message}")
 ```
 
 ### Configuration Options

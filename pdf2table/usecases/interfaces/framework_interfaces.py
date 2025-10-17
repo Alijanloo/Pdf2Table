@@ -15,6 +15,10 @@ class PDFImageExtractorInterface(ABC):
         """Extract image from PDF page."""
         pass
 
+    @abstractmethod
+    def get_page_count(self, pdf_path: str) -> int:
+        """Get total number of pages in PDF."""
+        pass
 
 class TableDetectorInterface(ABC):
     """Abstract interface for table detection."""

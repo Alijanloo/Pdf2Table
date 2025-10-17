@@ -5,13 +5,13 @@ Test table extraction on actual PDF file
 
 import os
 
-from pdf2table.frameworks.pipeline import TableExtractionFactory
+from pdf2table.frameworks.pipeline import create_pipeline
 
 
 def test_actual_table_extraction():
     """Test table extraction on the sample PDF"""
     print("✅ Creating table extraction pipeline...")
-    use_case = TableExtractionFactory.create_pipeline(visualize=True)
+    use_case = create_pipeline(visualize=True)
 
     pdf_path = "data/oxford-textbook-of-medicine-693.pdf"
 

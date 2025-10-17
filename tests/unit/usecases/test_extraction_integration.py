@@ -84,7 +84,7 @@ class TestTableExtractionIntegration(unittest.TestCase):
         )
 
         # Act
-        results = use_case.extract_tables_from_page("sample.pdf", 0)
+        results = use_case._extract_tables_from_page("sample.pdf", 0)
 
         # Assert
         assert len(results) == 1

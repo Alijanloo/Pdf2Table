@@ -79,7 +79,7 @@ class TestTableExtractionUseCase(unittest.TestCase):
         self.mock_ocr_service.extract_text.return_value = "test text"
         
         # Act
-        result = self.use_case.extract_tables_from_page(pdf_path, page_number)
+        result = self.use_case._extract_tables_from_page(pdf_path, page_number)
         
         # Assert
         assert len(result) >= 1
@@ -123,7 +123,7 @@ class TestTableExtractionUseCase(unittest.TestCase):
         self.mock_structure_recognizer.recognize_structure.return_value = [cell1]
         
         # Act
-        result = self.use_case.extract_tables_from_page(pdf_path, page_number)
+        result = self.use_case._extract_tables_from_page(pdf_path, page_number)
         
         # Assert
         assert len(result) == 0  # No valid tables should be returned
@@ -190,7 +190,7 @@ class TestTableExtractionUseCase(unittest.TestCase):
         self.mock_ocr_service.extract_text.return_value = "test"
         
         # Act
-        result = self.use_case.extract_tables_from_page(pdf_path, page_number)
+        result = self.use_case._extract_tables_from_page(pdf_path, page_number)
         
         # Assert
         assert len(result) >= 1  # Only the second table should succeed
