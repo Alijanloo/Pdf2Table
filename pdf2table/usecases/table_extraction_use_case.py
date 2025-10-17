@@ -41,6 +41,36 @@ class TableExtractionUseCase:
         self._visualize = visualize
         self._visualization_save_dir = visualization_save_dir
 
+    def extract_tables(
+        self, pdf_path: str, page_number: Optional[int] = None
+    ) -> List[DetectedTable]:
+        """
+        Extract all tables from a PDF document.
+
+        Args:
+            pdf_path: Path to the PDF file
+            page_number: Optional page number to extract. If None, extracts from all pages.
+
+        Returns:
+            List of DetectedTable objects from the specified page(s)
+        """
+        if page_number is not None:
+            return self.extract_tables_from_page(pdf_path, page_number)
+
+        # Extract from all pages
+        page_count = self.pdf_extractor.get_page_count(pdf_path)
+        all_tables = []
+
+        for page_num in range(page_count):
+            try:
+                tables = self.extract_tables_from_page(pdf_path, page_num)
+                all_tables.extend(tables)
+            except Exception as e:
+                print(f"Error processing page {page_num}: {e}")
+                continue
+
+        return all_tables
+
     def extract_tables_from_page(
         self, pdf_path: str, page_number: int
     ) -> List[DetectedTable]:

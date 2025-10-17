@@ -6,7 +6,6 @@ Test table extraction on actual PDF file
 import os
 
 from pdf2table.frameworks.table_extraction_factory import TableExtractionFactory
-from pdf2table.usecases.dtos import TableExtractionRequest
 
 
 def test_actual_table_extraction():
@@ -15,7 +14,7 @@ def test_actual_table_extraction():
     adapter = TableExtractionFactory.create_table_extraction_adapter(visualize=True)
 
     # Sample PDF path
-    pdf_path = "tests/samples/A_Comprehensive_Review_of_Low_Rank_Adaptation_in_Large_Language_Models_for_Efficient_Parameter_Tuning-1.pdf"
+    pdf_path = "data/oxford-textbook-of-medicine-693.pdf"
 
     if not os.path.exists(pdf_path):
         print(f"❌ PDF file not found: {pdf_path}")
@@ -23,11 +22,10 @@ def test_actual_table_extraction():
 
     try:
         print(f"\n🔍 Testing with sample PDF: {os.path.basename(pdf_path)}")
-        request = TableExtractionRequest(pdf_path, 4)
-        result = adapter.extract_tables(request).to_dict()
+        result = adapter.extract_tables(pdf_path, page_number=0).to_dict()
 
         if result["success"]:
-            print("✅ Successfully processed page 4")
+            print("✅ Successfully processed page 0")
             print(f"📊 Found {len(result['tables'])} table(s)")
         else:
             print(f"⚠️ Processing failed: {result.get('error', 'Unknown error')}")

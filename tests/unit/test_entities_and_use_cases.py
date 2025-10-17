@@ -15,9 +15,8 @@ from pdf2table.usecases.services.table_services import (
     TableValidationService, CoordinateClusteringService
 )
 from pdf2table.usecases.table_extraction_use_case import TableExtractionUseCase
-from pdf2table.usecases.dtos import (
-    TableExtractionRequest, TableExtractionResponse, TableExtractionAdapter
-)
+from pdf2table.usecases.dtos import TableExtractionResponse
+from pdf2table.adaptors.table_extraction_adaptor import TableExtractionAdapter
 
 
 class TestCleanArchitectureCore(unittest.TestCase):
@@ -54,14 +53,10 @@ class TestCleanArchitectureCore(unittest.TestCase):
     
     def test_interface_adapters_layer_complete(self):
         """Test all interface adapters functionality"""
-        # Test request/response DTOs
-        request = TableExtractionRequest("/test/file.pdf", 0)
-        self.assertEqual(request.pdf_path, "/test/file.pdf")
-        
+        # Test response DTOs
         tables = [Mock()]
         response = TableExtractionResponse(
             tables=tables,
-            page_number=0,
             source_file="/test/file.pdf"
         )
         self.assertTrue(response.success)
@@ -69,10 +64,10 @@ class TestCleanArchitectureCore(unittest.TestCase):
         
         # Test adapter coordination
         mock_use_case = Mock()
-        mock_use_case.extract_tables_from_page.return_value = tables
+        mock_use_case.extract_tables.return_value = tables
         
         adapter = TableExtractionAdapter(mock_use_case)
-        result = adapter.extract_tables(request)
+        result = adapter.extract_tables("/test/file.pdf", page_number=0)
         
         self.assertIsInstance(result, TableExtractionResponse)
         self.assertTrue(result.success)
@@ -104,7 +99,7 @@ class TestCleanArchitectureCore(unittest.TestCase):
         mock_table_detector.detect_tables.return_value = []
         
         # Execute use case
-        result = use_case.extract_tables_from_page("/test/path.pdf", 0)
+        result = use_case.extract_tables("/test/path.pdf", page_number=0)
         
         # Verify basic workflow
         mock_pdf_extractor.extract_page_image.assert_called_once()

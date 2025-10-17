@@ -34,19 +34,21 @@ pdf2table/
 ### 2. Use Cases Layer (`pdf2table/usecases/`)
 - **table_extraction_use_case.py**: Application business logic
   - `TableExtractionUseCase`: Orchestrates table extraction workflow
+    - `extract_tables(pdf_path, page_number=None)`: Main extraction method
   - `TableGridBuilder`: Builds structured grids from detected cells
   - Contains the core algorithms for grouping rows/columns and building grids
 - **services/table_services.py**: Supporting services for use cases
   - `TableValidationService`: Validates detected table structures and cells
   - `CoordinateClusteringService`: Clusters coordinates for row/column grouping
 - **dtos.py**: Data transfer objects for use cases
-  - `TableExtractionRequest`: Request DTO for table extraction
   - `TableExtractionResponse`: Response DTO for table extraction
 
 ### 3. Interface Adapters Layer (`pdf2table/adaptors/`)
-- **table_extraction_ports.py**: Abstract interfaces and DTOs
-  - Port interfaces: `PDFImageExtractorPort`, `TableDetectorPort`, etc.
+- **table_extraction_adaptor.py**: Adapter for table extraction
   - `TableExtractionAdapter`: Coordinates between use cases and external interfaces
+    - `extract_tables(pdf_path, page_number=None)`: Main adapter method
+      - Accepts `pdf_path` and optional `page_number`
+      - Returns `TableExtractionResponse`
 
 ### 4. Frameworks & Drivers Layer (`pdf2table/frameworks/`)
 - **pdf_image_extractor.py**: PyMuPDF implementation
@@ -61,14 +63,18 @@ pdf2table/
 from pdf2table.frameworks.table_extraction_factory import TableExtractionService
 
 service = TableExtractionService(device="cpu")
-result = service.extract_tables_from_page(pdf_path, page_number)
+
+# Extract from a specific page
+result = service.extract_tables_from_page(pdf_path, page_number=0)
 tables = result["tables"]
+
+# Or extract from all pages
+all_results = service.extract_tables_from_pdf(pdf_path)
 ```
 
 ### Usage (Advanced)
 ```python
 from pdf2table.frameworks.table_extraction_factory import TableExtractionFactory
-from pdf2table.usecases.dtos import TableExtractionRequest
 
 # Create with custom configuration
 adapter = TableExtractionFactory.create_table_extraction_adapter(
@@ -77,7 +83,9 @@ adapter = TableExtractionFactory.create_table_extraction_adapter(
     structure_threshold=0.7
 )
 
-# Use the adapter
-request = TableExtractionRequest(pdf_path, page_number)
-response = adapter.extract_tables(request)
+# Extract from a specific page
+response = adapter.extract_tables(pdf_path, page_number=0)
+
+# Or extract from all pages
+response = adapter.extract_tables(pdf_path)
 ```

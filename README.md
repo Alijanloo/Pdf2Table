@@ -38,15 +38,16 @@ pip install -e .
 ### Usage
 ```python
 from pdf2table.frameworks.table_extraction_factory import TableExtractionFactory
-from pdf2table.usecases.dtos import TableExtractionRequest
 
 # Initialize the factory
 factory = TableExtractionFactory()
 adapter = factory.create_table_extraction_adapter()
 
-# Extract tables from PDF
-request = TableExtractionRequest(pdf_path="document.pdf", page_number=0)
-response = adapter.extract_tables(request)
+# Extract tables from a specific page
+response = adapter.extract_tables(pdf_path="document.pdf", page_number=0)
+
+# Or extract tables from all pages
+response = adapter.extract_tables(pdf_path="document.pdf")
 
 # Access extracted tables
 for table in response.tables:
@@ -72,18 +73,14 @@ service = TableExtractionService(device="cpu")
 page_result = service.extract_tables_from_page("document.pdf", page_number=0)
 print(f"Found {len(page_result['tables'])} tables on page 0")
 
-# Extract tables from entire PDF
+# Extract tables from entire PDF (all pages)
 all_results = service.extract_tables_from_pdf("document.pdf")
-for page_idx, page_result in enumerate(all_results):
-    if page_result.get('success', True):
-        tables = page_result.get('tables', [])
-        print(f"Page {page_idx}: Found {len(tables)} tables")
-        
-        # Process each table
-        for table_idx, table in enumerate(tables):
-            print(f"  Table {table_idx + 1}: {table['rows']} rows x {table['columns']} columns")
-    else:
-        print(f"Page {page_idx}: Error - {page_result.get('error', 'Unknown error')}")
+tables = all_results.get('tables', [])
+print(f"Found {len(tables)} total tables across all pages")
+
+# Process each table
+for table_idx, table in enumerate(tables):
+    print(f"  Table {table_idx + 1}: {table['metadata']}")
 ```
 
 ## 📋 Logging
