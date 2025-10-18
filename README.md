@@ -2,20 +2,35 @@
 
 A Python library for detecting, extracting, and processing tables from PDF documents.
 
+![Pdf2Table Sample](docs/sample.png)
+
 ## Overview
 
-This project provides a robust solution for extracting tabular data from PDF documents. The library utilizes advanced computer vision models to detect and recognize table structures, making it easy to convert PDF tables into structured data formats.
+This project provides a robust solution for extracting tabular data from PDF documents using state-of-the-art computer vision models.
+
+The extraction pipeline implements a **4-step methodology**:
+1. **PDF Rendering** - Convert pages to high-resolution images with text extraction
+2. **Table Detection** - Identify table regions using transformer models
+3. **Structure Recognition** - Detect cells, rows, columns, and headers
+4. **Grid Construction** - Build structured grids with intelligent text extraction (direct PDF + OCR fallback)
 
 ## Technologies Used
 
-- **Table Transformer**: For recognizing table structures in PDF documents.
-- **PyMuPDF**: For reading PDF files.
+- **Table Transformer Models** (Microsoft Research): Detection and structure recognition
+- **PyMuPDF (fitz)**: PDF processing and rendering with direct text extraction
+- **TrOCR** (Microsoft): Optional OCR fallback for scanned documents
+- **Transformers** (Hugging Face): Model inference pipeline
+- **Pydantic**: Entity validation and data modeling
 
 ## Features
 
-- PDF processing with page-by-page table detection
-- Table structure recognition using Table Transformer
-- Clean architecture with separation of concerns
+- **Advanced Table Detection**: High-confidence table region identification using transformer models
+- **Structure Recognition**: Automatic detection of cells, merged cells, headers, rows, and columns
+- **Intelligent Text Extraction**: Two-stage approach (direct PDF text + OCR fallback)
+- **Flexible Configuration**: Customizable thresholds, DPI, and processing options
+- **Clean Architecture**: Well-organized codebase following software engineering best practices
+- **Comprehensive Logging**: Detailed logs for debugging and monitoring
+- **Multiple Output Formats**: JSON export with metadata and structured data
 
 ## Installation
 
@@ -69,9 +84,20 @@ The `create_pipeline()` method accepts the following parameters:
 
 - `device` (str): Device for ML models - "cpu" or "cuda" (default: "cpu")
 - `detection_threshold` (float): Confidence threshold for table detection (default: 0.9)
+  - High (0.9+): Fewer false positives, may miss some tables
+  - Medium (0.7-0.9): Balanced detection
+  - Low (<0.7): More tables detected, more false positives
 - `structure_threshold` (float): Confidence threshold for structure recognition (default: 0.6)
+  - High (0.8+): Clean structure, may miss some cells
+  - Medium (0.5-0.8): Balanced recognition (recommended)
+  - Low (<0.5): Detects more cells, more noise
 - `pdf_dpi` (int): DPI for PDF page rendering (default: 300)
+  - 150: Faster processing, lower quality
+  - 300: Balanced (recommended)
+  - 600+: Better quality, slower processing
 - `load_ocr` (bool): Whether to load OCR service (default: False)
+  - False: Direct PDF text extraction only (faster, recommended for native PDFs)
+  - True: Enable TrOCR fallback (essential for scanned documents)
 - `visualize` (bool): Whether to enable visualization (default: False)
 - `visualization_save_dir` (str): Directory to save visualizations (default: "data/table_visualizations")
 
@@ -84,6 +110,16 @@ The project includes comprehensive logging capabilities for debugging and monito
 - `logs/pdf2table_errors.log` - Error-only log
 
 **Documentation**: See `docs/logging_guide.md` for detailed logging documentation.
+
+## 🏗️ Architecture
+
+The project follows **Clean Architecture** with three main layers:
+
+- **Entities Layer**: Core business objects (PageImage, DetectedTable, TableGrid, GridCell)
+- **Use Cases Layer**: Business logic orchestration (TableExtractionUseCase, TableGridBuilder)
+- **Frameworks Layer**: External tools (PyMuPDF, Table Transformer, TrOCR)
+
+For detailed technical documentation, see `docs/technical_report/technical_report.md`.
 
 ## 🎯 Use Cases
 
